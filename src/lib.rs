@@ -10,6 +10,16 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
+//! Utilities for iterating over random permutations.
+//!
+//! `permutation-iterator` provides utilities for iterating over random permutations in constant
+//! space.
+//!
+//! # Quick Start
+//!
+//! Please check the GitHub repository's `README.md` and `examples` folder for how to get started
+//! with this library.
+
 use blake2_rfc::blake2b::Blake2b;
 use rand::Rng;
 
@@ -85,27 +95,6 @@ impl Iterator for Permutor {
     }
 }
 
-/// Implements a Feistel network, which can take a non-invertible pseudo-random function (PRF)
-/// and turn it into an invertible pseudo-random permutation (PRP). This is useful in fields like
-/// cryptography, where a block cipher is a PRP.
-pub struct FeistelNetwork {
-    /// TODO visible just for testing, fix
-    pub half_width: u64,
-
-    /// Mask used to keep within the width for the right.
-    /// TODO visible just for testing, fix
-    pub right_mask: u64,
-
-    /// Mask used to keep within the width for the left.
-    /// TODO visible just for testing, fix
-    pub left_mask: u64,
-
-    /// Private key, some random seed. 256 bits as 32 bytes.
-    key: [u8; 32],
-
-    rounds: u8,
-}
-
 /// Iterate over a random permutation of a pair of integer sequences.
 ///
 /// # Examples
@@ -150,6 +139,43 @@ impl Iterator for RandomPairPermutor {
             _ => None,
         }
     }
+}
+
+/// Implements a Feistel network, which can take a non-invertible pseudo-random function (PRF)
+/// and turn it into an invertible pseudo-random permutation (PRP).
+///
+/// If you use this struct directly note that its intended purpose is to be a PRP and map from
+/// an n-bit input to an n-bit output, where n is an even positive integer. For example, if
+/// constructed with a `max` of `10`, internally it creates a 4-bit Feistel network, and for all
+/// integers in the 4-bit domain `[0, 16)` (`0` inclusive to `16` exclusive) it will map an input
+/// to one and only one output, and vice-versa (a given output maps to one and only one input).
+/// Even though you specified a max value of `10`, the output range may be larger than expected.
+/// Clients like `RandomPermutor` handle this by excluding output values outside of the desired
+/// range.
+///
+/// This is useful in fields like cryptography, where a block cipher is a PRP.
+///
+/// Another great use of a Feistel network is when you want some input to always map to one and only
+/// one output (and vice versa). For example, given a 32-bit IP address, we could use some secret
+/// key and map each IP address to some other 32-bit IP address. We could log this new 32-bit
+/// IP address and people who do not know what the secret key is would find it difficult
+/// to determine what the input IP address was. This is Format Preserving Encryption (FPE).
+pub struct FeistelNetwork {
+    /// TODO visible just for testing, fix
+    pub half_width: u64,
+
+    /// Mask used to keep within the width for the right.
+    /// TODO visible just for testing, fix
+    pub right_mask: u64,
+
+    /// Mask used to keep within the width for the left.
+    /// TODO visible just for testing, fix
+    pub left_mask: u64,
+
+    /// Private key, some random seed. 256 bits as 32 bytes.
+    key: [u8; 32],
+
+    rounds: u8,
 }
 
 impl FeistelNetwork {
