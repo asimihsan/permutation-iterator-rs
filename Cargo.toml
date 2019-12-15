@@ -13,9 +13,7 @@ documentation = "https://docs.rs/permutation-iterator-rs/"
 repository = "https://github.com/asimihsan/permutation-iterator-rs"
 homepage = "https://github.com/asimihsan/permutation-iterator-rs"
 readme = "README.md"
-
 license = "Apache-2.0"
-license_file = "LICENSE"
 
 [badges]
 travis-ci = { repository = "asimihsan/permutation-iterator-rs", branch = "master" }
