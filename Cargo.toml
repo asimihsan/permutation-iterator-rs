@@ -3,11 +3,18 @@ name = "permutation_iterator"
 version = "0.1.0"
 edition = "2018"
 authors = ["Asim Ihsan <asim.ihsan@gmail.com>"]
+
+description = "A Rust library for iterating over random permutations without fully materializing them into memory."
+documentation = "https://docs.rs/permutation-iterator-rs/"
+repository = "https://github.com/asimihsan/permutation-iterator-rs"
+homepage = "https://github.com/asimihsan/permutation-iterator-rs"
+readme = "README.md"
+
 license = "Apache-2.0"
 license_file = "LICENSE"
-readme = "README.md"
-homepage = "https://github.com/asimihsan/permutation-iterator-rs"
-description = "A Rust library for iterating over random permutations without fully materializing them into memory."
+
+[badges]
+travis-ci = { repository = "asimihsan/permutation-iterator-rs", branch = "master" }
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
