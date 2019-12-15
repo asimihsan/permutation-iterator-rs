@@ -78,7 +78,30 @@ fn main() {
 
 ## Implementation details
 
+One way of generating a random permutation is to shuffle a list. For example, given input integers `[0, 1, 2, 3, 4, 5]`,
+one can shuffle it to e.g. `[5, 3, 2, 0, 1, 4]`. Each input element maps to one and only one output element, and
+vice versa (each output element maps to one and only one input element). As you consume the shuffled list from e.g.
+left to right you're consuming this random permutation.
 
+Shuffling is `O(n)` time using the Fisher-Yates algorithm, however it is also `O(n)` space. We need a copy of the
+elements in-memory in order to shuffle them. This is inconvenient if the input range is large, or if the environment
+you're running on is memory-constrained.
+
+Cryptography offers an alternative. Symmetric encryption boils down to mapping a given input to one and only one output,
+where the mapping is varied by a single secret key, and vice-versa (each output element maps to one and only one input
+element). If this **bijective** mapping did not exist we wouldn't be reliably able to retrieve the original input. One
+specific kind of symmetric encryption uses a **block** cipher (operating on n-bits at a time) implemented using a 
+**Feistel network**.
+
+A Feistel network is an extraordinary construct that allows you to use a simple, relatively weak **non-invertible**
+function over and over again and become a complicated, relatively strong **invertible permutation**. Hence in
+constant time we can _encrypt_ inputs as a way of iterating over random permutations. We can similarly _decrypt_
+the output as a way of _resuming_ permutations.
+
+Consider the example of a bank that is trying to generate unique credit card numbers. Actual credit card numbers need
+to be stored very securely and we would rather not have to look them in order to find the next available number. By
+storing just a key and the last credit card number generated we can securely and efficiently continue iterating over
+the random permutation of all credit card numbers, without risking repeats.
 
 ## License
 
