@@ -17,7 +17,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-permutation_iterator = "0.1.0"
+permutation_iterator = "0.1.1"
 ```
 
 ## Example
