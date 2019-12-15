@@ -23,5 +23,5 @@ travis-ci = { repository = "asimihsan/permutation-iterator-rs", branch = "master
 name = "medium"
 
 [dependencies]
-blake2-rfc = c"0.2.18"
+blake2-rfc = "0.2.18"
 rand = "0.7.2"
