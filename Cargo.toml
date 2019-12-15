@@ -4,8 +4,11 @@ version = "0.1.1-alpha.0"
 edition = "2018"
 authors = ["Asim Ihsan <asim.ihsan@gmail.com>"]
 
-description = "A Rust library for iterating over random permutations without fully materializing them into memory."
-keywords = ["permutation", "permute"]
+description = """
+A Rust library for iterating over random permutations using O(1) (i.e. constant) space.
+"""
+keywords = ["permutation", "permute", "random"]
+categories = ["algorithms"]
 documentation = "https://docs.rs/permutation-iterator-rs/"
 repository = "https://github.com/asimihsan/permutation-iterator-rs"
 homepage = "https://github.com/asimihsan/permutation-iterator-rs"
