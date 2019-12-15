@@ -6,12 +6,16 @@ mod tests {
 
     #[test]
     fn test_different_key_means_different_result() {
+        // === given ===
         let max = 10;
         let key1 = 0;
         let key2 = 1;
 
+        // === when ===
         let values1 = get_permutation_values(max, key1);
         let values2 = get_permutation_values(max, key2);
+
+        // === then ===
         assert_ne!(
             values1, values2,
             "expected different permutations given max {}, first key {}, second key {}",
@@ -21,11 +25,15 @@ mod tests {
 
     #[test]
     fn test_same_key_means_same_result() {
+        // === given ===
         let max = 10;
         let key = 2;
 
+        // === when ===
         let values1 = get_permutation_values(max, key);
         let values2 = get_permutation_values(max, key);
+
+        // === then ===
         assert_eq!(
             values1, values2,
             "expected same permutations given max {}, key {} used twice",
@@ -48,8 +56,13 @@ mod tests {
     }
 
     fn get_permutation_values(max: u64, key: u64) -> Vec<u64> {
+        // === given ===
         let permutor = Permutor::new_with_u64_key(max, key);
+
+        // === when ===
         let result: Vec<u64> = permutor.collect();
+
+        // === then ===
         assert_eq!(
             max as usize,
             result.len(),
