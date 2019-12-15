@@ -13,8 +13,8 @@ jobs:
 cache: cargo
 
 script:
-  - cargo build --verbose --all --release
-  - cargo test --verbose --all --release
+  - cargo build --all --release
+  - cargo test --all --release
 
 after_success:
   - if [ "$TRAVIS_RUST_VERSION" == "nightly" ]; then
