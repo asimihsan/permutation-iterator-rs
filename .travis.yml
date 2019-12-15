@@ -1,0 +1,22 @@
+language: rust
+
+rust:
+  - stable
+  - beta
+  - nightly
+
+jobs:
+  allow_failures:
+    - rust: nightly
+  fast_finish: true
+
+cache: cargo
+
+script:
+  - cargo build --verbose --all --release
+  - cargo test --verbose --all --release
+
+after_success:
+  - if [ "$TRAVIS_RUST_VERSION" == "nightly" ]; then
+      cargo bench;
+    fi
