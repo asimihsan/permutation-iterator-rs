@@ -21,7 +21,7 @@ mod tests {
 
             // Small-value tests are still pretty unreliable...so need bigger diff.
             (10, 60_000, 0.3),
-            (17, 24_000, 0.1),
+            (17, 24_000, 0.2),
             (50, 8_000, 0.05),
             (100, 4_000, 0.05),
             (1000, 1_000, 0.05),
