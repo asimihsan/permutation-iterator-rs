@@ -49,8 +49,7 @@ before_script:
 
 script:
   - bash -c 'if [[ "$RUN_TEST" == "true" ]]; then
-      export CI_RUST_VERSION="$TRAVIS_RUST_VERSION"
-      cargo test --release
+      cargo test --release && cargo test --release -- --nocapture --ignored
       ;
     fi'
   - bash -c 'if [[ "$RUN_RUSTFMT" == "true" ]]; then

@@ -91,7 +91,7 @@ impl Iterator for Permutor {
             self.values_returned += 1;
             return Some(next);
         }
-        return None;
+        None
     }
 }
 
@@ -231,8 +231,7 @@ impl FeistelNetwork {
         }
 
         let result = (left << self.half_width) | right;
-        let result = result & (self.left_mask | self.right_mask);
-        result
+        result & (self.left_mask | self.right_mask)
     }
 
     fn round_function(&self, right: u64, round: u8, key: &[u8], mask: u64) -> u64 {
@@ -248,7 +247,7 @@ impl FeistelNetwork {
 }
 
 fn slice_to_u64(input: &[u8]) -> u64 {
-    ((input[7] as u64) << 0)
+    (input[7] as u64)
         | ((input[6] as u64) << 8)
         | ((input[5] as u64) << 16)
         | ((input[4] as u64) << 24)
@@ -276,13 +275,13 @@ fn u8_to_1slice(input: u8) -> [u8; 1] {
 /// ```
 pub fn u64_to_8slice(input: u64) -> [u8; 8] {
     let mut result: [u8; 8] = [0; 8];
-    result[7] = ((input & 0xFF) >> 0) as u8;
+    result[7] = (input & 0xFF) as u8;
     result[6] = ((input & 0xFF00) >> 8) as u8;
-    result[5] = ((input & 0xFF00_00) >> 16) as u8;
+    result[5] = ((input & 0x00FF_0000) >> 16) as u8;
     result[4] = ((input & 0xFF00_0000) >> 24) as u8;
-    result[3] = ((input & 0xFF00_0000_00) >> 32) as u8;
+    result[3] = ((input & 0x00FF_0000_0000) >> 32) as u8;
     result[2] = ((input & 0xFF00_0000_0000) >> 40) as u8;
-    result[1] = ((input & 0xFF00_0000_0000_00) >> 48) as u8;
+    result[1] = ((input & 0x00FF_0000_0000_0000) >> 48) as u8;
     result[0] = ((input & 0xFF00_0000_0000_0000) >> 56) as u8;
     result
 }
@@ -303,8 +302,6 @@ pub fn u64_to_8slice(input: u64) -> [u8; 8] {
 pub fn u64_to_32slice(input: u64) -> [u8; 32] {
     let result8 = u64_to_8slice(input);
     let mut result: [u8; 32] = [0; 32];
-    for i in 0..8 {
-        result[i] = result8[i];
-    }
+    result[..8].clone_from_slice(&result8[..8]);
     result
 }

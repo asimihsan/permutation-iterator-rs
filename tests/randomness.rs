@@ -16,7 +16,7 @@ mod tests {
             // The true random chi-squared value is very variable, [1, 15] almost, so testing very
             // small max_value permutations reliably is difficult.
             // (4, 100_000),
-            (10, 40_000),
+            (10, 60_000),
             (17, 24_000),
             (50, 8_000),
             (100, 4_000),
