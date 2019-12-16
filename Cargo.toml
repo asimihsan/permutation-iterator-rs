@@ -23,6 +23,14 @@ travis-ci = { repository = "asimihsan/permutation-iterator-rs", branch = "master
 [[bench]]
 name = "medium"
 
+# To use these `cargo install cargo-template-ci` then run `cargo template-ci`. This will generate Travis config for you.
+[package.metadata.template_ci]
+dist = "bionic"
+versions = ["stable", "beta", "nightly"]
+clippy = { allow_failure = false }
+rustfmt = { allow_failure = false }
+bench = { run = true }
+
 [dependencies]
 blake2-rfc = "0.2.18"
 rand = "0.7.2"
