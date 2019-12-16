@@ -1,22 +1,79 @@
+# TemplateCIConfig { bench: BenchEntry(MatrixEntry { run: true, run_cron: false, version: "nightly", install_commandline: None, commandline: "cargo bench" }), clippy: ClippyEntry(MatrixEntry { run: true, run_cron: false, version: "stable", install_commandline: Some("rustup component add clippy"), commandline: "cargo clippy -- -D warnings" }), rustfmt: RustfmtEntry(MatrixEntry { run: true, run_cron: false, version: "stable", install_commandline: Some("rustup component add rustfmt"), commandline: "cargo fmt -v -- --check" }), additional_matrix_entries: {}, cache: "cargo", os: "linux", dist: "bionic", versions: ["stable", "beta", "nightly"], test_commandline: "cargo test --verbose --all", scheduled_test_branches: ["master"], test_schedule: "0 0 * * 0" }
+os:
+  - "linux"
+dist: "bionic"
+
 language: rust
+sudo: required
+cache: cargo
 
 rust:
   - stable
   - beta
   - nightly
 
-jobs:
-  allow_failures:
-    - rust: nightly
-  fast_finish: true
+env:
+  global:
+    - RUN_TEST=true
+    - RUN_CLIPPY=false
+    - RUN_BENCH=false
 
-cache: cargo
+matrix:
+  fast_finish: true
+  include:
+    - &rustfmt_build
+      rust: "stable"
+      env:
+        - RUN_RUSTFMT=true
+        - RUN_TEST=false
+    - &bench_build
+      rust: "nightly"
+      env:
+        - RUN_BENCH=true
+        - RUN_TEST=false
+    - &clippy_build
+      rust: "stable"
+      env:
+        - RUN_CLIPPY=true
+        - RUN_TEST=false
+
+before_script:
+  - bash -c 'if [[ "$RUN_RUSTFMT" == "true" ]]; then
+      rustup component add rustfmt
+      ;
+    fi'
+  - bash -c 'if [[ "$RUN_CLIPPY" == "true" ]]; then
+      rustup component add clippy
+      ;
+    fi'
 
 script:
-  - cargo build --all --release
-  - cargo test --all --release
+  - bash -c 'if [[ "$RUN_TEST" == "true" ]]; then
+      export CI_RUST_VERSION="$TRAVIS_RUST_VERSION"
+      cargo test --verbose --all
+      ;
+    fi'
+  - bash -c 'if [[ "$RUN_RUSTFMT" == "true" ]]; then
+      cargo fmt -v -- --check
+      ;
+    fi'
+  - bash -c 'if [[ "$RUN_BENCH" == "true" ]]; then
+      cargo bench
+      ;
+    fi'
+  - bash -c 'if [[ "$RUN_CLIPPY" == "true" ]]; then
+      cargo clippy -- -D warnings
+      ;
+    fi'
 
-after_success:
-  - if [ "$TRAVIS_RUST_VERSION" == "nightly" ]; then
-      cargo bench;
-    fi
+branches:
+  only:
+    # release tags
+    - /^v\d+\.\d+\.\d+.*$/
+    - master
+    - trying
+    - staging
+
+notifications:
+  email:
+    on_success: never
