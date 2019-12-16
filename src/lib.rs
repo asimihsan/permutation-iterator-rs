@@ -198,8 +198,8 @@ impl FeistelNetwork {
     /// Note that the value of max is rounded up to the nearest even power of 2. If clients are
     /// trying to get a permutation of [0, max) they need to iterate over the input range and
     /// discard values from FeistelNetwork >= max.
-    pub fn new_with_slice_key(max: u64, key: [u8; 32]) -> FeistelNetwork {
-        let width = (max as f64).log2();
+    pub fn new_with_slice_key(max_value: u64, key: [u8; 32]) -> FeistelNetwork {
+        let width = (max_value as f64).log2();
         let mut width = width.ceil() as u64;
         if width % 2 != 0 {
             width += 1;
@@ -215,7 +215,7 @@ impl FeistelNetwork {
             right_mask,
             left_mask,
             key,
-            rounds: 4,
+            rounds: 12,
         }
     }
 
