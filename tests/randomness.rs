@@ -9,18 +9,22 @@ mod tests {
     /// [0, max), see if each given returned value is evenly distributed.
     ///
     /// Only run this test in release mode, or else it will take too long.
+    ///
+    /// Test isn't very reliable especially for small max_value's but better than nothing.
     #[test]
     #[ignore]
     fn test_randomness_chi_squared() {
-        for (max_value, max_key) in vec![
+        for (max_value, max_key, ratio_diff_threshold) in vec![
             // The true random chi-squared value is very variable, [1, 15] almost, so testing very
             // small max_value permutations reliably is difficult.
             // (4, 100_000),
-            (10, 60_000),
-            (17, 24_000),
-            (50, 8_000),
-            (100, 4_000),
-            (1000, 1_000),
+
+            // Small-value tests are still pretty unreliable...so need bigger diff.
+            (10, 60_000, 0.3),
+            (17, 24_000, 0.1),
+            (50, 8_000, 0.05),
+            (100, 4_000, 0.05),
+            (1000, 1_000, 0.05),
         ] {
             let chi_squared_permutor = randomness_chi_squared(max_value, max_key, false);
             let chi_squared_true_random = randomness_chi_squared(max_value, max_key, true);
@@ -34,8 +38,9 @@ mod tests {
             // If ratio_diff is negative, permutor is "more random" than true randomness (which is
             // absurd, just a test artifact). We fail the test if we're "less random" by 10%.
             assert!(
-                ratio_diff < 0.1,
-                "Expected permutor to be as random or worse by 10% than true randomness!"
+                ratio_diff < ratio_diff_threshold,
+                "Expected permutor to be as random or worse by {:.2} than true randomness!",
+                ratio_diff_threshold
             );
         }
     }
