@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod tests {
     use permutation_iterator::Permutor;
+    use rand::prelude::StdRng;
     use rand::seq::SliceRandom;
     use rand::Rng;
     use std::collections::HashMap;
@@ -13,42 +14,40 @@ mod tests {
     /// Test isn't very reliable especially for small max_value's but better than nothing.
     #[test]
     #[ignore]
-    fn test_randomness_chi_squared() {
-        for _i in 0..10 {
-            for (max_value, max_key, ratio_diff_threshold) in vec![
-                // The true random chi-squared value is very variable, [1, 15] almost, so testing very
-                // small max_value permutations reliably is difficult.
-                // (4, 100_000),
+    fn test_randomness_g_test() {
+        for (max_value, max_key, ratio_diff_threshold) in vec![
+            // The true random chi-squared value is very variable, [1, 15] almost, so testing very
+            // small max_value permutations reliably is difficult.
+            // (4, 100_000),
 
-                // Small-value tests are still pretty unreliable...can't really leave it in!
-                //(10, 200_000, 0.3),
-                (17, 100_000, 0.2),
-                (50, 8_000, 0.05),
-                (100, 4_000, 0.05),
-                (1000, 1_000, 0.05),
-            ] {
-                let chi_squared_permutor = randomness_chi_squared(max_value, max_key, false);
-                let chi_squared_true_random = randomness_chi_squared(max_value, max_key, true);
-                let ratio_diff =
-                    (chi_squared_permutor - chi_squared_true_random) / chi_squared_permutor;
-                println!(
-                    "max_value: {}, max_key: {}, chi_squared_permutor: {:.2}, chi_squared_true_random: {:.2}, ratio_diff: {:.2}",
-                    max_value, max_key, chi_squared_permutor, chi_squared_true_random, ratio_diff
+            // Small-value tests are still pretty unreliable...can't really leave it in!
+            (10, 200_000, 0.3),
+            (17, 100_000, 0.2),
+            (50, 50_000, 0.05),
+            (100, 50_000, 0.05),
+            (1000, 50_000, 0.05),
+        ] {
+            let g_test_permutor = randomness_g_test(max_value, max_key, false);
+            let g_test_true_random = randomness_g_test(max_value, max_key, true);
+            let ratio_diff = (g_test_permutor - g_test_true_random) / g_test_permutor;
+            println!(
+                "max_value: {}, max_key: {}, g_test_permutor: {:.2}, g_test_true_random: {:.2}, ratio_diff: {:.2}",
+                max_value, max_key, g_test_permutor, g_test_true_random, ratio_diff
                 );
 
-                // If ratio_diff is negative, permutor is "more random" than true randomness (which is
-                // absurd, just a test artifact). We fail the test if we're "less random" by 10%.
-                assert!(
-                    ratio_diff < ratio_diff_threshold,
-                    "Expected permutor to be as random or worse by {:.2} than true randomness!",
-                    ratio_diff_threshold
-                );
-            }
+            // If ratio_diff is negative, permutor is "more random" than true randomness (which is
+            // absurd, just a test artifact).
+            assert!(
+                ratio_diff < ratio_diff_threshold,
+                "Expected permutor to be as random or worse by {:.2} than true randomness!",
+                ratio_diff_threshold
+            );
         }
     }
 
-    fn randomness_chi_squared(max_value: u64, max_key: u64, true_random: bool) -> f64 {
-        let mut rng = rand::thread_rng();
+    /// Reference: https://en.wikipedia.org/wiki/G-test
+    fn randomness_g_test(max_value: u64, max_key: u64, true_random: bool) -> f64 {
+        let mut rng: StdRng = rand::SeedableRng::seed_from_u64(42);
         let min_key = 0;
         let mut cell_counts: HashMap<usize, HashMap<u64, u32>> =
             HashMap::with_capacity(max_value as usize);
@@ -69,16 +68,16 @@ mod tests {
             }
         }
 
-        let expected_frequency: u32 = ((max_key - min_key) / max_value) as u32;
-        let mut chi_squared_numerator: u32 = 0;
+        let mut g_test_sum: f64 = 0.0;
+        let expected_count: f64 = (max_key - min_key) as f64 / max_value as f64;
         for (_cell_index, cell_count) in cell_counts {
-            for (_cell_value, count) in cell_count {
-                let diff = count - expected_frequency;
-                let diff = diff * diff;
-                chi_squared_numerator += diff;
+            for (_cell_value, observed_count) in cell_count {
+                let g_test_subvalue =
+                    (observed_count as f64 / expected_count).ln() * observed_count as f64;
+                g_test_sum += g_test_subvalue;
             }
         }
-        chi_squared_numerator as f64 / expected_frequency as f64
+        2.0 * g_test_sum
     }
 
     fn get_random_permutation_permutor(max_value: u64, key: u64) -> Vec<u64> {
