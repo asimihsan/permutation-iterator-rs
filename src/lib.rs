@@ -20,8 +20,9 @@
 //! Please check the GitHub repository's `README.md` and `examples` folder for how to get started
 //! with this library.
 
-use blake2_rfc::blake2b::Blake2b;
 use rand::Rng;
+use std::hash::Hasher;
+use wyhash::WyHash;
 
 /// Permutor gives you back a permutation iterator that returns a random permutation over
 /// [0, max) (0 inclusive to max exclusive).
@@ -215,7 +216,7 @@ impl FeistelNetwork {
             right_mask,
             left_mask,
             key,
-            rounds: 12,
+            rounds: 32,
         }
     }
 
@@ -225,7 +226,7 @@ impl FeistelNetwork {
 
         for i in 0..self.rounds as u8 {
             let new_left = right;
-            let f = self.round_function(right, i, &self.key[..], self.right_mask);
+            let f = self.round_function(right, i, self.key, self.right_mask);
             right = left ^ f;
             left = new_left;
         }
@@ -234,27 +235,17 @@ impl FeistelNetwork {
         result & (self.left_mask | self.right_mask)
     }
 
-    fn round_function(&self, right: u64, round: u8, key: &[u8], mask: u64) -> u64 {
+    fn round_function(&self, right: u64, round: u8, key: [u8; 32], mask: u64) -> u64 {
         let right_bytes = u64_to_8slice(right);
         let round_bytes = u8_to_1slice(round);
-        let mut context: Blake2b = Blake2b::with_key(8, key);
-        context.update(&right_bytes[..]);
-        context.update(&round_bytes[..]);
-        let hash = context.finalize();
-        let hash_bytes: &[u8] = hash.as_bytes();
-        slice_to_u64(hash_bytes) & mask
-    }
-}
 
-fn slice_to_u64(input: &[u8]) -> u64 {
-    (input[7] as u64)
-        | ((input[6] as u64) << 8)
-        | ((input[5] as u64) << 16)
-        | ((input[4] as u64) << 24)
-        | ((input[3] as u64) << 32)
-        | ((input[2] as u64) << 40)
-        | ((input[1] as u64) << 48)
-        | ((input[0] as u64) << 56)
+        let mut hasher = WyHash::default();
+        hasher.write(&key[..]);
+        hasher.write(&right_bytes[..]);
+        hasher.write(&round_bytes[..]);
+        hasher.write(&key[..]);
+        hasher.finish() & mask
+    }
 }
 
 fn u8_to_1slice(input: u8) -> [u8; 1] {

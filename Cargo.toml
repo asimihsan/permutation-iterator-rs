@@ -32,5 +32,5 @@ rustfmt = { allow_failure = false }
 bench = { run = true }
 
 [dependencies]
-blake2-rfc = "0.2.18"
 rand = "0.7.2"
+wyhash = "0.3.0"
