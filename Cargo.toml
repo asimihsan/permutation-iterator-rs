@@ -20,6 +20,9 @@ travis-ci = { repository = "asimihsan/permutation-iterator-rs", branch = "master
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[profile.release]
+lto = true
+
 [[bench]]
 name = "medium"
 
