@@ -20,8 +20,10 @@
 //! Please check the GitHub repository's `README.md` and `examples` folder for how to get started
 //! with this library.
 
+use num::{Num, One, Zero};
 use rand::Rng;
 use std::hash::Hasher;
+use std::ops::ShrAssign;
 use wyhash::WyHash;
 
 /// Permutor gives you back a permutation iterator that returns a random permutation over
@@ -200,8 +202,7 @@ impl FeistelNetwork {
     /// trying to get a permutation of [0, max) they need to iterate over the input range and
     /// discard values from FeistelNetwork >= max.
     pub fn new_with_slice_key(max_value: u64, key: [u8; 32]) -> FeistelNetwork {
-        let width = (max_value as f64).log2();
-        let mut width = width.ceil() as u64;
+        let mut width = integer_log2(max_value).unwrap();
         if width % 2 != 0 {
             width += 1;
         }
@@ -295,4 +296,40 @@ pub fn u64_to_32slice(input: u64) -> [u8; 32] {
     let mut result: [u8; 32] = [0; 32];
     result[..8].clone_from_slice(&result8[..8]);
     result
+}
+
+/// Calculate log2 of an integer input. This tells you how many bits are required to represent the
+/// input.
+///
+/// # Examples
+///
+/// ```
+/// use permutation_iterator::integer_log2;
+/// assert_eq!(None, integer_log2(0), "failed for {}", 0);
+/// assert_eq!(Some(1), integer_log2(1), "failed for {}", 1);
+/// assert_eq!(Some(2), integer_log2(2), "failed for {}", 2);
+/// assert_eq!(Some(2), integer_log2(3), "failed for {}", 3);
+/// assert_eq!(Some(3), integer_log2(4), "failed for {}", 4);
+/// assert_eq!(Some(3), integer_log2(5), "failed for {}", 5);
+/// assert_eq!(Some(3), integer_log2(6), "failed for {}", 6);
+/// assert_eq!(Some(3), integer_log2(7), "failed for {}", 7);
+/// assert_eq!(Some(4), integer_log2(8), "failed for {}", 8);
+/// assert_eq!(Some(4), integer_log2(9), "failed for {}", 9);
+/// assert_eq!(Some(4), integer_log2(10), "failed for {}", 9);
+/// ```
+pub fn integer_log2<N>(input: N) -> Option<u64>
+where
+    N: Num + Ord + ShrAssign + Zero + One,
+{
+    let _0 = N::zero();
+    if input == _0 {
+        return None;
+    }
+    let mut result = 0;
+    let mut input_copy = input;
+    while input_copy > _0 {
+        input_copy.shr_assign(N::one());
+        result += 1;
+    }
+    Some(result)
 }
