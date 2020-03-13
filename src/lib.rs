@@ -23,7 +23,7 @@
 use num::{Num, One, Zero};
 use rand::Rng;
 use std::hash::Hasher;
-use std::ops::ShrAssign;
+use std::ops::{AddAssign, ShrAssign};
 use wyhash::WyHash;
 
 /// Permutor gives you back a permutation iterator that returns a random permutation over
@@ -38,7 +38,7 @@ use wyhash::WyHash;
 /// use crate::permutation_iterator::Permutor;
 /// use std::collections::HashSet;
 ///
-/// let max: u64 = 10;
+/// let max: u128 = 10;
 /// let permutor = Permutor::new(max);
 /// for value in permutor {
 ///     println!("{}", value);
@@ -46,13 +46,13 @@ use wyhash::WyHash;
 /// ```
 pub struct Permutor {
     feistel: FeistelNetwork,
-    max: u64,
-    current: u64,
-    values_returned: u64,
+    max: u128,
+    current: u128,
+    values_returned: u128,
 }
 
 impl Permutor {
-    pub fn new_with_u64_key(max: u64, key: u64) -> Permutor {
+    pub fn new_with_u64_key(max: u128, key: u64) -> Permutor {
         let key = u64_to_32slice(key);
         Permutor {
             feistel: FeistelNetwork::new_with_slice_key(max, key),
@@ -62,7 +62,7 @@ impl Permutor {
         }
     }
 
-    pub fn new_with_slice_key(max: u64, key: [u8; 32]) -> Permutor {
+    pub fn new_with_slice_key(max: u128, key: [u8; 32]) -> Permutor {
         Permutor {
             feistel: FeistelNetwork::new_with_slice_key(max, key),
             max,
@@ -71,7 +71,7 @@ impl Permutor {
         }
     }
 
-    pub fn new(max: u64) -> Permutor {
+    pub fn new(max: u128) -> Permutor {
         Permutor {
             feistel: FeistelNetwork::new(max),
             max,
@@ -82,7 +82,7 @@ impl Permutor {
 }
 
 impl Iterator for Permutor {
-    type Item = u64;
+    type Item = u128;
 
     fn next(&mut self) -> Option<Self::Item> {
         while self.values_returned < self.max {
@@ -116,12 +116,12 @@ impl Iterator for Permutor {
 ///
 pub struct RandomPairPermutor {
     permutor: Permutor,
-    max2: u32,
+    max2: u64,
 }
 
 impl RandomPairPermutor {
-    pub fn new(max1: u32, max2: u32) -> RandomPairPermutor {
-        let max: u64 = (max1 as u64) * (max2 as u64);
+    pub fn new(max1: u64, max2: u64) -> RandomPairPermutor {
+        let max: u128 = (max1 as u128) * (max2 as u128);
         RandomPairPermutor {
             permutor: Permutor::new(max),
             max2,
@@ -130,13 +130,13 @@ impl RandomPairPermutor {
 }
 
 impl Iterator for RandomPairPermutor {
-    type Item = (u32, u32);
+    type Item = (u64, u64);
 
     fn next(&mut self) -> Option<Self::Item> {
         match self.permutor.next() {
             Some(value) => {
-                let first = value as u32 / self.max2;
-                let second = value as u32 % self.max2;
+                let first = value as u64 / self.max2;
+                let second = value as u64 % self.max2;
                 Some((first, second))
             }
             _ => None,
@@ -165,15 +165,15 @@ impl Iterator for RandomPairPermutor {
 /// to determine what the input IP address was. This is Format Preserving Encryption (FPE).
 pub struct FeistelNetwork {
     /// TODO visible just for testing, fix
-    pub half_width: u64,
+    pub half_width: u128,
 
     /// Mask used to keep within the width for the right.
     /// TODO visible just for testing, fix
-    pub right_mask: u64,
+    pub right_mask: u128,
 
     /// Mask used to keep within the width for the left.
     /// TODO visible just for testing, fix
-    pub left_mask: u64,
+    pub left_mask: u128,
 
     /// Private key, some random seed. 256 bits as 32 bytes.
     key: [u8; 32],
@@ -190,7 +190,7 @@ impl FeistelNetwork {
     /// discard values from FeistelNetwork >= max.
     ///
     /// The key used for the permutation is made up of securely gathered 32 bytes.
-    pub fn new(max: u64) -> FeistelNetwork {
+    pub fn new(max: u128) -> FeistelNetwork {
         let key = rand::thread_rng().gen::<[u8; 32]>();
         FeistelNetwork::new_with_slice_key(max, key)
     }
@@ -201,7 +201,7 @@ impl FeistelNetwork {
     /// Note that the value of max is rounded up to the nearest even power of 2. If clients are
     /// trying to get a permutation of [0, max) they need to iterate over the input range and
     /// discard values from FeistelNetwork >= max.
-    pub fn new_with_slice_key(max_value: u64, key: [u8; 32]) -> FeistelNetwork {
+    pub fn new_with_slice_key(max_value: u128, key: [u8; 32]) -> FeistelNetwork {
         let mut width = integer_log2(max_value).unwrap();
         if width % 2 != 0 {
             width += 1;
@@ -221,7 +221,7 @@ impl FeistelNetwork {
         }
     }
 
-    pub fn permute(&self, input: u64) -> u64 {
+    pub fn permute(&self, input: u128) -> u128 {
         let mut left = (input & self.left_mask) >> self.half_width;
         let mut right = input & self.right_mask;
 
@@ -236,8 +236,8 @@ impl FeistelNetwork {
         result & (self.left_mask | self.right_mask)
     }
 
-    fn round_function(&self, right: u64, round: u8, key: [u8; 32], mask: u64) -> u64 {
-        let right_bytes = u64_to_8slice(right);
+    fn round_function(&self, right: u128, round: u8, key: [u8; 32], mask: u128) -> u128 {
+        let right_bytes = u64_to_8slice(right as u64);
         let round_bytes = u8_to_1slice(round);
 
         let mut hasher = WyHash::default();
@@ -245,7 +245,7 @@ impl FeistelNetwork {
         hasher.write(&right_bytes[..]);
         hasher.write(&round_bytes[..]);
         hasher.write(&key[..]);
-        hasher.finish() & mask
+        (hasher.finish() as u128) & mask
     }
 }
 
@@ -317,19 +317,19 @@ pub fn u64_to_32slice(input: u64) -> [u8; 32] {
 /// assert_eq!(Some(4), integer_log2(9), "failed for {}", 9);
 /// assert_eq!(Some(4), integer_log2(10), "failed for {}", 9);
 /// ```
-pub fn integer_log2<N>(input: N) -> Option<u64>
+pub fn integer_log2<N>(input: N) -> Option<N>
 where
-    N: Num + Ord + ShrAssign + Zero + One,
+    N: Num + Ord + ShrAssign + AddAssign + Zero + One,
 {
     let _0 = N::zero();
     if input == _0 {
         return None;
     }
-    let mut result = 0;
+    let mut result: N = N::zero();
     let mut input_copy = input;
     while input_copy > _0 {
         input_copy.shr_assign(N::one());
-        result += 1;
+        result += N::one();
     }
     Some(result)
 }
