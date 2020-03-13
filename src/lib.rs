@@ -321,13 +321,13 @@ pub fn integer_log2<N>(input: N) -> Option<N>
 where
     N: Num + Ord + ShrAssign + AddAssign + Zero + One,
 {
-    let _0 = N::zero();
-    if input == _0 {
+    let _zero = N::zero();
+    if input == _zero {
         return None;
     }
     let mut result: N = N::zero();
     let mut input_copy = input;
-    while input_copy > _0 {
+    while input_copy > _zero {
         input_copy.shr_assign(N::one());
         result += N::one();
     }
