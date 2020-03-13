@@ -37,3 +37,4 @@ bench = { run = true }
 [dependencies]
 rand = "0.7.2"
 wyhash = "0.3.0"
+num = "0.2.1"
