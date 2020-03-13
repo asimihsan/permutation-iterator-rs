@@ -46,13 +46,13 @@ mod tests {
     }
 
     /// Reference: https://en.wikipedia.org/wiki/G-test
-    fn randomness_g_test(max_value: u64, max_key: u64, true_random: bool) -> f64 {
+    fn randomness_g_test(max_value: u128, max_key: u64, true_random: bool) -> f64 {
         let mut rng: StdRng = rand::SeedableRng::seed_from_u64(42);
         let min_key = 0;
-        let mut cell_counts: HashMap<usize, HashMap<u64, u32>> =
+        let mut cell_counts: HashMap<usize, HashMap<u128, u32>> =
             HashMap::with_capacity(max_value as usize);
         for key in min_key..max_key {
-            let values: Vec<u64>;
+            let values: Vec<u128>;
             if true_random {
                 values = get_random_permutation_true_random(max_value, &mut rng);
             } else {
@@ -80,13 +80,13 @@ mod tests {
         2.0 * g_test_sum
     }
 
-    fn get_random_permutation_permutor(max_value: u64, key: u64) -> Vec<u64> {
+    fn get_random_permutation_permutor(max_value: u128, key: u64) -> Vec<u128> {
         let permutor = Permutor::new_with_u64_key(max_value, key);
         permutor.collect()
     }
 
-    fn get_random_permutation_true_random(max_value: u64, rng: &mut impl Rng) -> Vec<u64> {
-        let mut values: Vec<u64> = (0..max_value).collect();
+    fn get_random_permutation_true_random(max_value: u128, rng: &mut impl Rng) -> Vec<u128> {
+        let mut values: Vec<u128> = (0..max_value).collect();
         values.shuffle(rng);
         values
     }

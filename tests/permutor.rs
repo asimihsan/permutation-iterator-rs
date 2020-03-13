@@ -56,12 +56,12 @@ mod tests {
         get_permutation_values(25_000, 0);
     }
 
-    fn get_permutation_values(max_value: u64, key: u64) -> Vec<u64> {
+    fn get_permutation_values(max_value: u128, key: u64) -> Vec<u128> {
         // === given ===
         let permutor = Permutor::new_with_u64_key(max_value, key);
 
         // === when ===
-        let result: Vec<u64> = permutor.collect();
+        let result: Vec<u128> = permutor.collect();
 
         // === then ===
         assert_eq!(
@@ -71,7 +71,7 @@ mod tests {
             max_value,
             key
         );
-        let result_unique: HashSet<u64> = HashSet::from_iter(result.clone());
+        let result_unique: HashSet<u128> = HashSet::from_iter(result.clone());
         assert_eq!(
             max_value as usize,
             result_unique.len(),
