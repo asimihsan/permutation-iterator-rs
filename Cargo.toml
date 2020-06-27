@@ -8,7 +8,7 @@ description = """
 A Rust library for iterating over random permutations using O(1) (i.e. constant) space.
 """
 keywords = ["permutation", "permute", "random"]
-categories = ["algorithms"]
+categories = ["algorithms", "no-std"]
 documentation = "https://docs.rs/permutation-iterator-rs/"
 repository = "https://github.com/asimihsan/permutation-iterator-rs"
 homepage = "https://github.com/asimihsan/permutation-iterator-rs"
@@ -34,7 +34,16 @@ clippy = { allow_failure = false }
 rustfmt = { allow_failure = false }
 bench = { run = true }
 
+[dependencies.getrandom]
+version = "0.1.14"
+features = ["wasm-bindgen"]
+
+[dependencies.anyhow]
+version = "1.0.13"
+default-features = false
+
 [dependencies]
-rand = "0.7.2"
 wyhash = "0.3.0"
-num = "0.2.1"
+
+[dev-dependencies]
+rand = "0.7.3"

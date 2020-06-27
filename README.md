@@ -103,6 +103,12 @@ to be stored very securely and we would rather not have to look them in order to
 storing just a key and the last credit card number generated we can securely and efficiently continue iterating over
 the random permutation of all credit card numbers, without risking repeats.
 
+## Maintainer notes
+
+### How to release a new version
+
+
+
 ## License
 
 `permutation-iterator` is distributed under the terms of the Apache License (Version 2.0). See [LICENSE](LICENSE) for

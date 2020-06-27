@@ -58,7 +58,8 @@ mod tests {
 
     fn get_permutation_values(max_value: u128, key: u64) -> Vec<u128> {
         // === given ===
-        let permutor = Permutor::new_with_u64_key(max_value, key);
+        let permutor = Permutor::new_with_u64_key(max_value, key)
+            .expect("expected new permutator with u64 key");
 
         // === when ===
         let result: Vec<u128> = permutor.collect();

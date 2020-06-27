@@ -81,7 +81,7 @@ mod tests {
     }
 
     fn get_random_permutation_permutor(max_value: u128, key: u64) -> Vec<u128> {
-        let permutor = Permutor::new_with_u64_key(max_value, key);
+        let permutor = Permutor::new_with_u64_key(max_value, key).expect("expected new Permutor");
         permutor.collect()
     }
 
