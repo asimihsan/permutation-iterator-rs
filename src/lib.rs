@@ -19,11 +19,9 @@
 //!
 //! Please check the GitHub repository's `README.md` and `examples` folder for how to get started
 //! with this library.
+#![no_std]
 
-use num::{Num, One, Zero};
-use rand::Rng;
-use std::hash::Hasher;
-use std::ops::{AddAssign, ShrAssign};
+use core::hash::Hasher;
 use wyhash::WyHash;
 
 /// Permutor gives you back a permutation iterator that returns a random permutation over
@@ -39,7 +37,7 @@ use wyhash::WyHash;
 /// use std::collections::HashSet;
 ///
 /// let max: u128 = 10;
-/// let permutor = Permutor::new(max);
+/// let permutor = Permutor::new(max).expect("Expected new Permutor");
 /// for value in permutor {
 ///     println!("{}", value);
 /// }
@@ -52,32 +50,32 @@ pub struct Permutor {
 }
 
 impl Permutor {
-    pub fn new_with_u64_key(max: u128, key: u64) -> Permutor {
+    pub fn new_with_u64_key(max: u128, key: u64) -> anyhow::Result<Permutor> {
         let key = u64_to_32slice(key);
-        Permutor {
+        Ok(Permutor {
             feistel: FeistelNetwork::new_with_slice_key(max, key),
             max,
             current: 0,
             values_returned: 0,
-        }
+        })
     }
 
-    pub fn new_with_slice_key(max: u128, key: [u8; 32]) -> Permutor {
-        Permutor {
+    pub fn new_with_slice_key(max: u128, key: [u8; 32]) -> anyhow::Result<Permutor> {
+        Ok(Permutor {
             feistel: FeistelNetwork::new_with_slice_key(max, key),
             max,
             current: 0,
             values_returned: 0,
-        }
+        })
     }
 
-    pub fn new(max: u128) -> Permutor {
-        Permutor {
-            feistel: FeistelNetwork::new(max),
+    pub fn new(max: u128) -> anyhow::Result<Permutor> {
+        Ok(Permutor {
+            feistel: FeistelNetwork::new(max)?,
             max,
             current: 0,
             values_returned: 0,
-        }
+        })
     }
 }
 
@@ -108,7 +106,7 @@ impl Iterator for Permutor {
 /// ```
 /// use permutation_iterator::RandomPairPermutor;
 ///
-/// let pair_permutor = RandomPairPermutor::new(3, 7);
+/// let pair_permutor = RandomPairPermutor::new(3, 7).expect("expected new RandomPairPermutor");
 /// for (i, j) in pair_permutor {
 ///     println!("({}, {})", i, j);
 /// }
@@ -120,12 +118,12 @@ pub struct RandomPairPermutor {
 }
 
 impl RandomPairPermutor {
-    pub fn new(max1: u64, max2: u64) -> RandomPairPermutor {
+    pub fn new(max1: u64, max2: u64) -> anyhow::Result<RandomPairPermutor> {
         let max: u128 = (max1 as u128) * (max2 as u128);
-        RandomPairPermutor {
-            permutor: Permutor::new(max),
+        Ok(RandomPairPermutor {
+            permutor: Permutor::new(max)?,
             max2,
-        }
+        })
     }
 }
 
@@ -190,9 +188,10 @@ impl FeistelNetwork {
     /// discard values from FeistelNetwork >= max.
     ///
     /// The key used for the permutation is made up of securely gathered 32 bytes.
-    pub fn new(max: u128) -> FeistelNetwork {
-        let key = rand::thread_rng().gen::<[u8; 32]>();
-        FeistelNetwork::new_with_slice_key(max, key)
+    pub fn new(max: u128) -> anyhow::Result<FeistelNetwork> {
+        let mut key: [u8; 32] = [0; 32];
+        getrandom::getrandom(&mut key).map_err(anyhow::Error::msg)?;
+        Ok(FeistelNetwork::new_with_slice_key(max, key))
     }
 
     /// Create a new FeistelNetwork instance that can give you a random permutation of
@@ -237,7 +236,7 @@ impl FeistelNetwork {
     }
 
     fn round_function(&self, right: u128, round: u8, key: [u8; 32], mask: u128) -> u128 {
-        let right_bytes = u64_to_8slice(right as u64);
+        let right_bytes = u128_to_16slice(right);
         let round_bytes = u8_to_1slice(round);
 
         let mut hasher = WyHash::default();
@@ -255,6 +254,37 @@ fn u8_to_1slice(input: u8) -> [u8; 1] {
     result
 }
 
+/// Convert an unsigned 128 bit number so a slice of 16 bytes in big-endian format (most significant
+/// bit first).
+///
+/// # Examples
+///
+/// ```
+/// use crate::permutation_iterator::u128_to_16slice;
+/// let output = u128_to_16slice(42);
+/// assert_eq!(output, [0, 0, 0, 0, 0, 0, 0, 0,
+///                     0, 0, 0, 0, 0, 0, 0, 0x2A]);
+/// ```
+pub fn u128_to_16slice(input: u128) -> [u8; 16] {
+    let mut result: [u8; 16] = [0; 16];
+    result[15] = ((input >> 00) & 0xFF) as u8;
+    result[14] = ((input >> 08) & 0xFF) as u8;
+    result[13] = ((input >> 16) & 0xFF) as u8;
+    result[12] = ((input >> 24) & 0xFF) as u8;
+    result[11] = ((input >> 32) & 0xFF) as u8;
+    result[10] = ((input >> 40) & 0xFF) as u8;
+    result[09] = ((input >> 48) & 0xFF) as u8;
+    result[08] = ((input >> 56) & 0xFF) as u8;
+    result[07] = ((input >> 64) & 0xFF) as u8;
+    result[06] = ((input >> 72) & 0xFF) as u8;
+    result[05] = ((input >> 80) & 0xFF) as u8;
+    result[04] = ((input >> 88) & 0xFF) as u8;
+    result[03] = ((input >> 96) & 0xFF) as u8;
+    result[02] = ((input >> 104) & 0xFF) as u8;
+    result[01] = ((input >> 112) & 0xFF) as u8;
+    result[00] = ((input >> 120) & 0xFF) as u8;
+    result
+}
 /// Convert an unsigned 64 bit number so a slice of 8 bytes in big-endian format (most significant
 /// bit first).
 ///
@@ -267,14 +297,14 @@ fn u8_to_1slice(input: u8) -> [u8; 1] {
 /// ```
 pub fn u64_to_8slice(input: u64) -> [u8; 8] {
     let mut result: [u8; 8] = [0; 8];
-    result[7] = (input & 0xFF) as u8;
-    result[6] = ((input & 0xFF00) >> 8) as u8;
-    result[5] = ((input & 0x00FF_0000) >> 16) as u8;
-    result[4] = ((input & 0xFF00_0000) >> 24) as u8;
-    result[3] = ((input & 0x00FF_0000_0000) >> 32) as u8;
-    result[2] = ((input & 0xFF00_0000_0000) >> 40) as u8;
-    result[1] = ((input & 0x00FF_0000_0000_0000) >> 48) as u8;
-    result[0] = ((input & 0xFF00_0000_0000_0000) >> 56) as u8;
+    result[07] = ((input >> 00) & 0xFF) as u8;
+    result[06] = ((input >> 08) & 0xFF) as u8;
+    result[05] = ((input >> 16) & 0xFF) as u8;
+    result[04] = ((input >> 24) & 0xFF) as u8;
+    result[03] = ((input >> 32) & 0xFF) as u8;
+    result[02] = ((input >> 40) & 0xFF) as u8;
+    result[01] = ((input >> 48) & 0xFF) as u8;
+    result[00] = ((input >> 56) & 0xFF) as u8;
     result
 }
 
@@ -317,19 +347,15 @@ pub fn u64_to_32slice(input: u64) -> [u8; 32] {
 /// assert_eq!(Some(4), integer_log2(9), "failed for {}", 9);
 /// assert_eq!(Some(4), integer_log2(10), "failed for {}", 9);
 /// ```
-pub fn integer_log2<N>(input: N) -> Option<N>
-where
-    N: Num + Ord + ShrAssign + AddAssign + Zero + One,
-{
-    let _zero = N::zero();
-    if input == _zero {
+pub fn integer_log2(input: u128) -> Option<u128> {
+    if input == 0 {
         return None;
     }
-    let mut result: N = N::zero();
+    let mut result = 0;
     let mut input_copy = input;
-    while input_copy > _zero {
-        input_copy.shr_assign(N::one());
-        result += N::one();
+    while input_copy > 0 {
+        input_copy >>= 1;
+        result += 1;
     }
     Some(result)
 }
