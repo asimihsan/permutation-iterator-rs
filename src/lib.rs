@@ -267,22 +267,22 @@ fn u8_to_1slice(input: u8) -> [u8; 1] {
 /// ```
 pub fn u128_to_16slice(input: u128) -> [u8; 16] {
     let mut result: [u8; 16] = [0; 16];
-    result[15] = ((input >> 00) & 0xFF) as u8;
-    result[14] = ((input >> 08) & 0xFF) as u8;
+    result[15] = (input & 0xFF) as u8;
+    result[14] = ((input >> 8) & 0xFF) as u8;
     result[13] = ((input >> 16) & 0xFF) as u8;
     result[12] = ((input >> 24) & 0xFF) as u8;
     result[11] = ((input >> 32) & 0xFF) as u8;
     result[10] = ((input >> 40) & 0xFF) as u8;
-    result[09] = ((input >> 48) & 0xFF) as u8;
-    result[08] = ((input >> 56) & 0xFF) as u8;
-    result[07] = ((input >> 64) & 0xFF) as u8;
-    result[06] = ((input >> 72) & 0xFF) as u8;
-    result[05] = ((input >> 80) & 0xFF) as u8;
-    result[04] = ((input >> 88) & 0xFF) as u8;
-    result[03] = ((input >> 96) & 0xFF) as u8;
-    result[02] = ((input >> 104) & 0xFF) as u8;
-    result[01] = ((input >> 112) & 0xFF) as u8;
-    result[00] = ((input >> 120) & 0xFF) as u8;
+    result[9] = ((input >> 48) & 0xFF) as u8;
+    result[8] = ((input >> 56) & 0xFF) as u8;
+    result[7] = ((input >> 64) & 0xFF) as u8;
+    result[6] = ((input >> 72) & 0xFF) as u8;
+    result[5] = ((input >> 80) & 0xFF) as u8;
+    result[4] = ((input >> 88) & 0xFF) as u8;
+    result[3] = ((input >> 96) & 0xFF) as u8;
+    result[2] = ((input >> 104) & 0xFF) as u8;
+    result[1] = ((input >> 112) & 0xFF) as u8;
+    result[0] = ((input >> 120) & 0xFF) as u8;
     result
 }
 /// Convert an unsigned 64 bit number so a slice of 8 bytes in big-endian format (most significant
@@ -297,14 +297,14 @@ pub fn u128_to_16slice(input: u128) -> [u8; 16] {
 /// ```
 pub fn u64_to_8slice(input: u64) -> [u8; 8] {
     let mut result: [u8; 8] = [0; 8];
-    result[07] = ((input >> 00) & 0xFF) as u8;
-    result[06] = ((input >> 08) & 0xFF) as u8;
-    result[05] = ((input >> 16) & 0xFF) as u8;
-    result[04] = ((input >> 24) & 0xFF) as u8;
-    result[03] = ((input >> 32) & 0xFF) as u8;
-    result[02] = ((input >> 40) & 0xFF) as u8;
-    result[01] = ((input >> 48) & 0xFF) as u8;
-    result[00] = ((input >> 56) & 0xFF) as u8;
+    result[7] = (input & 0xFF) as u8;
+    result[6] = ((input >> 8) & 0xFF) as u8;
+    result[5] = ((input >> 16) & 0xFF) as u8;
+    result[4] = ((input >> 24) & 0xFF) as u8;
+    result[3] = ((input >> 32) & 0xFF) as u8;
+    result[2] = ((input >> 40) & 0xFF) as u8;
+    result[1] = ((input >> 48) & 0xFF) as u8;
+    result[0] = ((input >> 56) & 0xFF) as u8;
     result
 }
 
