@@ -10,5 +10,5 @@ cargo check --target wasm32-wasi
 rustup run nightly cargo clippy -- -D warnings
 cargo test --release
 rustup run nightly cargo bench
-cargo test --test randomness --release -- --nocapture --ignored
+# cargo test --test randomness --release -- --nocapture --ignored
 
