@@ -43,7 +43,7 @@ version = "1.0.13"
 default-features = false
 
 [dependencies]
-wyhash = "0.3.0"
+wyhash = "0.5.0"
 
 [dev-dependencies]
 rand = "0.7.3"
