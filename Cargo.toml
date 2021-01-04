@@ -35,7 +35,7 @@ rustfmt = { allow_failure = false }
 bench = { run = true }
 
 [dependencies.getrandom]
-version = "0.1.14"
+version = "0.2.1"
 features = ["wasm-bindgen"]
 
 [dependencies.anyhow]
