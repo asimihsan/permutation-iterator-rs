@@ -46,4 +46,4 @@ default-features = false
 wyhash = "0.3.0"
 
 [dev-dependencies]
-rand = "0.7.3"
+rand = "0.8.2"
